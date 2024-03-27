@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import {getDownloadURL, getStorage, ref, uploadBytesResumable} from 'firebase/storage'
+import {getDownloadURL, getStorage, list, ref, uploadBytesResumable} from 'firebase/storage'
 import { app } from '../firebase'
 import { updateUserStart, updateUserSuccess, updateUserFailure, deleteUserFailure, deleteUserStart, deleteUserSuccess, signOutUserFailure, signOutUserStart, signOutUserSuccess } from '../redux/user/userSlice'
 import {Link} from 'react-router-dom'
@@ -127,6 +127,24 @@ export default function Profile() {
       setShowListingsError(true)
     }
   }
+
+  const handleListingDelete = async (id)=>{
+    try {
+      const res = await fetch(`/api/listing/delete/${id}`, {
+        method: 'DELETE'
+      })
+
+      const data = await res.json();
+      if(data.success === false){
+        console.log(data.message);
+        return;
+      }
+
+      setUserListings((prev) => prev.filter((listing) => listing._id !== id));
+    } catch (error) {
+      console.log(error.message);
+    }
+  }
   
   return (
     <div className='p-3 max-w-lg mx-auto'>
@@ -180,7 +198,7 @@ export default function Profile() {
             </Link>
 
             <div className='flex flex-col items-center'>
-              <button className='text-red-700'>DELETE</button>
+              <button onClick={()=>handleListingDelete(listing._id)} className='text-red-700'>DELETE</button>
               <button className='text-green-700'>EDIT</button>
             </div>
           </div>
